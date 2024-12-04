@@ -7,6 +7,8 @@ from fsspec.compression import unzip
 from picsellia import DatasetVersion, Project
 from picsellia.types.enums import AnnotationFileType
 
+from src.image_processor.ImageProcessor import ImageProcessor
+
 
 class YoloPrepareData:
 
@@ -14,7 +16,8 @@ class YoloPrepareData:
     def prepare_dataset(dataset:DatasetVersion, final_dataset_path:str) -> str:
 
         temp_path = "./temp_dataset"
-        dataset.download(temp_path)
+        dataset.download("./temp")
+        ImageProcessor("./temp", temp_path).process_folder()
 
         images = os.listdir(temp_path)
         item_per_dataset = (len(images) / 2) // 3
@@ -30,6 +33,7 @@ class YoloPrepareData:
         YoloPrepareData.move_images(train_images, temp_path, final_dataset_path, "train")
         YoloPrepareData.move_images(valid_images, temp_path, final_dataset_path, "val")
         YoloPrepareData.move_images(test_images, temp_path, final_dataset_path, "test")
+
 
         dataset.export_annotation_file(AnnotationFileType.YOLO, temp_path)
         zip_path = f'{temp_path}/0192f6db-86b6-784c-80e6-163debb242d5/annotations/{dataset.id}_annotations.zip'

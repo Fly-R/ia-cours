@@ -13,10 +13,7 @@ class ImageProcessor:
         self.__resized_size = 640
 
     def process_folder(self) -> None:
-        process_output_folder = os.path.join(
-            self.__dataset_folder_path, datetime.now().strftime("%Y%m%d%H%M%S")
-        )
-        os.mkdir(process_output_folder)
+        os.mkdir(self.__dataset_folder_path)
         for image_file in os.listdir(self.__image_path):
             image_path = os.path.join(self.__image_path, image_file)
 
@@ -25,7 +22,7 @@ class ImageProcessor:
             image.add_padding()
 
             processed_image_path = os.path.join(
-                process_output_folder, image_file
+                self.__dataset_folder_path, image_file
             )
             image.save(processed_image_path)
 
