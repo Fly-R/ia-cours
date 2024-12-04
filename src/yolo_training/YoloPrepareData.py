@@ -13,7 +13,7 @@ from src.image_processor.ImageProcessor import ImageProcessor
 class YoloPrepareData:
 
     @staticmethod
-    def prepare_dataset(dataset:DatasetVersion, final_dataset_path:str) -> str:
+    def prepare_dataset(dataset: DatasetVersion, final_dataset_path: str) -> str:
 
         temp_path = "./temp_dataset"
         dataset.download("./temp")
@@ -26,9 +26,9 @@ class YoloPrepareData:
         valid_images = images[int(item_per_dataset):int(item_per_dataset*2)]
         test_images = images[int(item_per_dataset*2):]
 
-        os.makedirs(f'{final_dataset_path}/train/', exist_ok=True)
-        os.makedirs(f'{final_dataset_path}/val/', exist_ok=True)
-        os.makedirs(f'{final_dataset_path}/test/', exist_ok=True)
+        for split in ['train', 'val', 'test']:
+            os.makedirs(f'{final_dataset_path}/images/{split}', exist_ok=True)
+            os.makedirs(f'{final_dataset_path}/labels/{split}', exist_ok=True)
 
         YoloPrepareData.move_images(train_images, temp_path, final_dataset_path, "train")
         YoloPrepareData.move_images(valid_images, temp_path, final_dataset_path, "val")
@@ -54,21 +54,26 @@ class YoloPrepareData:
         with open("./yolo_config.yaml", "w") as f:
             yaml_content = f"""
 path : ./dataset
-train: train
-val: val
-test: test        
+train: /images/train
+val: images/val
+test: images/test
 names: \n{names}
 """
             f.write(yaml_content)
+
+        shutil.copy(f'{temp_path}/data.yaml', f'{final_dataset_path}/data.yaml')
+
         return "./yolo_config.yml"
 
     @staticmethod
-    def move_images(images, src, dest, type):
+    def move_images(images, src, dest, split):
         for image in images:
-            shutil.move(f'{src}/{image}', f'{dest}/{type}/{image}')
+            shutil.move(f'{src}/{image}', f'{dest}/images/{split}/{image}')
 
     @staticmethod
-    def move_annotations(images, src, dest, type):
+    def move_annotations(images, src, dest, split):
         for image in images:
             image_name = os.path.splitext(image)[0]
-            shutil.move(f'{src}/{image_name}.txt', f'{dest}/{type}/{image_name}.txt')
+            annotation_path = f'{src}/{image_name}.txt'
+            if os.path.exists(annotation_path):
+                shutil.move(annotation_path, f'{dest}/labels/{split}/{image_name}.txt')
