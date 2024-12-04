@@ -8,7 +8,7 @@ class Image:
         self.__image_path = image_path
         self.__array = np.array(PILImage.open(image_path))
 
-        self.__padding_color = [114, 114, 144]
+        self.__padding_color = (114, 114, 144)
 
     def resize(self, new_size: int) -> None:
         """

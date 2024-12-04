@@ -2,3 +2,5 @@ pillow
 numpy == 1.26.4
 pre-commit
 black
+picsellia
+ultralytics
