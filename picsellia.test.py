@@ -31,5 +31,5 @@ if len(sys.argv) >= 2:
 
         Picsellia.attach_dataset(experiment=exp, dataset=dataset)
 
-        yolo_config_file = YoloPrepareData.prepare_dataset(pics.get_project(xml_reader.project_name), dataset, "./dataset")
+        yolo_config_file = YoloPrepareData.prepare_dataset(dataset, "./dataset")
 
