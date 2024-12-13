@@ -1,19 +1,11 @@
 import sys
 
-from picsellia import ModelVersion
+from ultralytics import YOLO
 
 from src.dataset_manager.Picsellia import Picsellia
 from src.file_reader.XmlReader import XmlReader
 from src.yolo_training.YoloPrepareData import YoloPrepareData
 
-''' DatasetDownloader(
-            api_token=xml_reader.api_token,
-            organization_name=xml_reader.organization_name
-        ).download(
-            dataset_path=xml_reader.dataset_path,
-            dataset_id=xml_reader.dataset_id,
-            clear=True
-        )'''
 
 if len(sys.argv) >= 2:
     if sys.argv[1] == "clear":
@@ -31,5 +23,10 @@ if len(sys.argv) >= 2:
 
         Picsellia.attach_dataset(experiment=exp, dataset=dataset)
 
-        yolo_config_file = YoloPrepareData.prepare_dataset(dataset, "./dataset")
+        yolo_config_file = YoloPrepareData(dataset).prepare_new_dataset("./dataset/v1")
+
+        # Load a model
+        model = YOLO("yolo11n.pt")  # load a pretrained model (recommended for training)
+        # Train the model
+        results = model.train(data=yolo_config_file, epochs=5, imgsz=640)
 

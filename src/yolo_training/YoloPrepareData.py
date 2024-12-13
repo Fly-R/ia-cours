@@ -1,10 +1,8 @@
 import os
 import shutil
-import zipfile
-
 import yaml
-from fsspec.compression import unzip
-from picsellia import DatasetVersion, Project
+
+from picsellia import DatasetVersion
 from picsellia.types.enums import AnnotationFileType
 
 from src.image_processor.ImageProcessor import ImageProcessor
@@ -12,68 +10,60 @@ from src.image_processor.ImageProcessor import ImageProcessor
 
 class YoloPrepareData:
 
-    @staticmethod
-    def prepare_dataset(dataset: DatasetVersion, final_dataset_path: str) -> str:
+    def __init__(self, dataset: DatasetVersion):
+        self.dataset = dataset
 
-        temp_path = "./temp_dataset"
-        dataset.download("./temp")
-        ImageProcessor("./temp", temp_path).process_folder()
+    def prepare_new_dataset(self, final_dataset_path: str, ratios:list[float]=None, seed:int=42) -> str:
 
-        images = os.listdir(temp_path)
-        item_per_dataset = (len(images) / 2) // 3
+        if ratios is None:
+            ratios = [0.6, 0.2, 0.2]
 
-        train_images = images[:int(item_per_dataset)]
-        valid_images = images[int(item_per_dataset):int(item_per_dataset*2)]
-        test_images = images[int(item_per_dataset*2):]
+        train_assets, test_assets, val_assets, count_train, count_test, count_val, labels = (
+            self.dataset.train_test_val_split(ratios=ratios, random_seed=seed))
 
-        for split in ['train', 'val', 'test']:
-            os.makedirs(f'{final_dataset_path}/images/{split}', exist_ok=True)
+        training_split = ['train', 'val', 'test']
+
+        train_assets.download(f"{final_dataset_path}/images/{training_split[0]}")
+        val_assets.download(f"{final_dataset_path}/images/{training_split[1]}")
+        test_assets.download(f"{final_dataset_path}/images/{training_split[2]}")
+
+        annotations_path = "./annotations"
+        self.__download_annotations(annotations_path)
+
+        for split in training_split:
             os.makedirs(f'{final_dataset_path}/labels/{split}', exist_ok=True)
+            YoloPrepareData.__move_annotations(os.listdir(f"{final_dataset_path}/images/{split}"), annotations_path, final_dataset_path, split)
+            ImageProcessor(f'{final_dataset_path}/images/{split}').process_folder()
 
-        YoloPrepareData.move_images(train_images, temp_path, final_dataset_path, "train")
-        YoloPrepareData.move_images(valid_images, temp_path, final_dataset_path, "val")
-        YoloPrepareData.move_images(test_images, temp_path, final_dataset_path, "test")
+        yaml_config = {
+            "path": final_dataset_path,
+            "train": "images/train",
+            "val": "images/val",
+            "test": "images/test",
+            "names": {}
+        }
 
+        index = 0
+        for label in labels:
+            yaml_config["names"][index] = label.name
+            index += 1
 
-        dataset.export_annotation_file(AnnotationFileType.YOLO, temp_path)
-        zip_path = f'{temp_path}/0192f6db-86b6-784c-80e6-163debb242d5/annotations/{dataset.id}_annotations.zip'
-        shutil.unpack_archive(zip_path, temp_path)
+        yaml_config_path = f'{final_dataset_path}/yolo_config.yaml'
+        with open(yaml_config_path, 'w') as file:
+            yaml.dump(yaml_config, file)
 
-        YoloPrepareData.move_annotations(train_images, temp_path, final_dataset_path, "train")
-        YoloPrepareData.move_annotations(valid_images, temp_path, final_dataset_path, "val")
-        YoloPrepareData.move_annotations(test_images, temp_path, final_dataset_path, "test")
+        return yaml_config_path
 
-        yaml_config = yaml.load(open(f'{temp_path}/data.yaml'), Loader=yaml.FullLoader)
-
-        label_index=0
-        names = ""
-        for label in yaml_config['names']:
-            names += f'     {label_index}:{label}\n'
-            label_index += 1
-
-        with open("./yolo_config.yaml", "w") as f:
-            yaml_content = f"""
-path : ./dataset
-train: /images/train
-val: images/val
-test: images/test
-names: \n{names}
-"""
-            f.write(yaml_content)
-
-        shutil.copy(f'{temp_path}/data.yaml', f'{final_dataset_path}/data.yaml')
-
-        return "./yolo_config.yml"
 
     @staticmethod
-    def move_images(images, src, dest, split):
-        for image in images:
-            shutil.move(f'{src}/{image}', f'{dest}/images/{split}/{image}')
-
-    @staticmethod
-    def move_annotations(images, src, dest, split):
+    def __move_annotations(images, src, dest, split):
         for image in images:
             image_name = os.path.splitext(image)[0]
             annotation_path = f'{src}/{image_name}.txt'
             if os.path.exists(annotation_path):
                 shutil.move(annotation_path, f'{dest}/labels/{split}/{image_name}.txt')
+
+    def __download_annotations(self, annotations_path:str) -> None:
+        self.dataset.export_annotation_file(AnnotationFileType.YOLO, annotations_path)
+        zip_path = f'{annotations_path}/0192f6db-86b6-784c-80e6-163debb242d5/annotations/{self.dataset.id}_annotations.zip'
+        shutil.unpack_archive(zip_path, annotations_path)
