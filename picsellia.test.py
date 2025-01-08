@@ -23,10 +23,13 @@ if len(sys.argv) >= 2:
 
         Picsellia.attach_dataset(experiment=exp, dataset=dataset)
 
-        yolo_config_file = YoloPrepareData(dataset).prepare_new_dataset("./dataset/v1")
-
+        yolo_config_file = YoloPrepareData(dataset).prepare_new_dataset("./dataset/v4")
+        # yolo_config_file = "./dataset/v1/yolo_config.yaml"
         # Load a model
         model = YOLO("yolo11n.pt")  # load a pretrained model (recommended for training)
+
         # Train the model
-        results = model.train(data=yolo_config_file, epochs=5, imgsz=640)
+        results = model.train(data=yolo_config_file, epochs=1, imgsz=640, close_mosaic=0)
+
+        eval = model.val()
 

@@ -5,13 +5,13 @@ import yaml
 from picsellia import DatasetVersion
 from picsellia.types.enums import AnnotationFileType
 
-from src.image_processor.ImageProcessor import ImageProcessor
-
 
 class YoloPrepareData:
 
-    def __init__(self, dataset: DatasetVersion):
+    def __init__(self, dataset: DatasetVersion, use_image_id=True):
         self.dataset = dataset
+        self.__use_image_id = use_image_id
+
 
     def prepare_new_dataset(self, final_dataset_path: str, ratios:list[float]=None, seed:int=42) -> str:
 
@@ -23,9 +23,9 @@ class YoloPrepareData:
 
         training_split = ['train', 'val', 'test']
 
-        train_assets.download(f"{final_dataset_path}/images/{training_split[0]}")
-        val_assets.download(f"{final_dataset_path}/images/{training_split[1]}")
-        test_assets.download(f"{final_dataset_path}/images/{training_split[2]}")
+        train_assets.download(f"{final_dataset_path}/images/{training_split[0]}", use_id=self.__use_image_id)
+        val_assets.download(f"{final_dataset_path}/images/{training_split[1]}", use_id=self.__use_image_id)
+        test_assets.download(f"{final_dataset_path}/images/{training_split[2]}", use_id=self.__use_image_id)
 
         annotations_path = "./annotations"
         self.__download_annotations(annotations_path)
@@ -33,7 +33,6 @@ class YoloPrepareData:
         for split in training_split:
             os.makedirs(f'{final_dataset_path}/labels/{split}', exist_ok=True)
             YoloPrepareData.__move_annotations(os.listdir(f"{final_dataset_path}/images/{split}"), annotations_path, final_dataset_path, split)
-            ImageProcessor(f'{final_dataset_path}/images/{split}').process_folder()
 
         yaml_config = {
             "path": final_dataset_path,
@@ -64,6 +63,6 @@ class YoloPrepareData:
                 shutil.move(annotation_path, f'{dest}/labels/{split}/{image_name}.txt')
 
     def __download_annotations(self, annotations_path:str) -> None:
-        self.dataset.export_annotation_file(AnnotationFileType.YOLO, annotations_path)
+        self.dataset.export_annotation_file(AnnotationFileType.YOLO, annotations_path, use_id=self.__use_image_id)
         zip_path = f'{annotations_path}/0192f6db-86b6-784c-80e6-163debb242d5/annotations/{self.dataset.id}_annotations.zip'
         shutil.unpack_archive(zip_path, annotations_path)
