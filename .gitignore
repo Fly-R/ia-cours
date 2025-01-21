@@ -7,6 +7,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+annotations/
+dataset/
+runs/
+*.pt
+
 # C extensions
 *.so
 

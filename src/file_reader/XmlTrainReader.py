@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-class XmlReader:
+class XmlTrainReader:
 
     def __init__(self, path:str):
         self.__path = path
