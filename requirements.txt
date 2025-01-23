@@ -4,3 +4,6 @@ pre-commit
 black
 picsellia
 ultralytics
+
+pytest
+pytest-cov
