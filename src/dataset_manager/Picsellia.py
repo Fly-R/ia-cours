@@ -1,6 +1,6 @@
-from logging import exception
 
-from picsellia import Client, Dataset, Experiment, Project, DatasetVersion
+from picsellia import Client, Experiment, Project, DatasetVersion
+from picsellia.types.enums import InferenceType, Framework
 
 
 class Picsellia:
@@ -24,6 +24,25 @@ class Picsellia:
 
     def get_dataset(self, dataset_id:str) -> DatasetVersion:
         return self.__client.get_dataset_version_by_id(dataset_id)
+
+    def upload_model_version(self, model_name:str, model_weights_path:str) -> None:
+        try:
+            model = self.__client.get_model(name=f'{model_name}_model')
+        except Exception as e:
+            model = self.__client.create_model(
+                name=f'{model_name}_model',
+                type=InferenceType.OBJECT_DETECTION,
+                framework=Framework.PYTORCH
+            )
+
+        model_version = model.create_version(
+            type=InferenceType.OBJECT_DETECTION,
+            framework=Framework.PYTORCH
+        )
+        try:
+            model_version.store(name="model-latest", path=f'{model_weights_path}/best.pt')
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def attach_dataset(experiment:Experiment, dataset:DatasetVersion) -> None:
