@@ -39,6 +39,7 @@ class Picsellia:
     def upload_model_version(self, model_name:str, model_weights_path:str) -> None:
         model = self.__client.get_model(name=model_name)
         export = self.__experiment.export_in_existing_model(model)
+        self.__experiment.attach_model_version(export)
         export.update(type=InferenceType.OBJECT_DETECTION)
         export.update(framework=Framework.PYTORCH)
         try:
@@ -59,5 +60,4 @@ class Picsellia:
 
         if dataset_already_attached is False:
             self.__experiment.attach_dataset(self.__dataset)
-
 
