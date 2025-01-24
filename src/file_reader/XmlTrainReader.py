@@ -19,8 +19,8 @@ class XmlTrainReader:
         return self.__root.find("dataset_path").text
 
     @property
-    def dataset_id(self):
-        return  self.__root.find("dataset_id").text
+    def dataset_version_id(self):
+        return  self.__root.find("dataset_version_id").text
 
     @property
     def project_name(self):
@@ -29,7 +29,3 @@ class XmlTrainReader:
     @property
     def experiment_name(self):
         return self.__root.find("experiment_name").text
-
-    @property
-    def model_name(self):
-        return self.__root.find("model_name").text

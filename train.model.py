@@ -16,12 +16,12 @@ def on_train_end(trainer:DetectionTrainer):
     metrics_csv = pd.read_csv(trainer.csv)
     for col in metrics_csv.columns:
         try:
-            exp.log(name=col, data=list(metrics_csv[col]), type=LogType.LINE)
+            experiment.log(name=col, data=list(metrics_csv[col]), type=LogType.LINE)
         except Exception as e:
             print(f'Error: {e}')
 
-    pics.upload_model_version(xml_reader.model_name, f'{trainer.save_dir}/weights')
-    exp.log_parameters(config)
+    pics.upload_model_version(xml_reader.project_name, f'{trainer.save_dir}/weights')
+    experiment.log_parameters(config)
 
 if __name__ == '__main__':
 
@@ -35,15 +35,15 @@ if __name__ == '__main__':
         api_token=xml_reader.api_token,
         organization_name=xml_reader.organization_name)
 
-    exp = pics.get_experiment(
+    experiment = pics.set_experiment(
         project_name=xml_reader.project_name,
         experiment_name=xml_reader.experiment_name,
         force_create=True
     )
 
-    dataset = pics.get_dataset(xml_reader.dataset_id)
+    dataset = pics.set_dataset(xml_reader.dataset_version_id)
 
-    Picsellia.attach_dataset(experiment=exp, dataset=dataset)
+    pics.attach_current_dataset()
 
     if len(sys.argv) >= 2 and sys.argv[1] == "-clear":
         shutil.rmtree(dataset_path, ignore_errors=True)
@@ -88,4 +88,4 @@ if __name__ == '__main__':
         optimizer=config["optimizer"]
     )
 
-    eval = model.val()
+    #eval = model.val()
