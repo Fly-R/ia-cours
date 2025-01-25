@@ -7,8 +7,8 @@ class XmlExecReader:
         self.__root = ET.parse(path).getroot()
 
     @property
-    def model_path(self):
-        return self.__root.find("model_path").text
+    def experiment_name(self):
+        return self.__root.find("experiment_name").text
 
     @property
     def images_folder(self):

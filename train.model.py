@@ -8,9 +8,9 @@ from ultralytics import YOLO
 from ultralytics.models.yolo.detect import DetectionTrainer
 
 from src.dataset_manager.Picsellia import Picsellia
+from src.file_reader.XmlPicselliaReader import XmlPicselliaReader
 from src.file_reader.XmlTrainReader import XmlTrainReader
 from src.yolo_training.YoloPrepareData import YoloPrepareData
-
 
 def on_train_end(trainer:DetectionTrainer):
     metrics_csv = pd.read_csv(trainer.csv)
@@ -20,28 +20,44 @@ def on_train_end(trainer:DetectionTrainer):
         except Exception as e:
             print(f'Error: {e}')
 
-    pics.upload_model_version(xml_reader.project_name, f'{trainer.save_dir}/weights')
-    experiment.log_parameters(config)
+    pics.upload_model_version(xml_picsellia_config.project_name, trainer.best)
+    experiment.log_parameters({
+        "batch_size" : trainer.args.batch,
+        "imgsz" : trainer.args.imgsz,
+        "device" : trainer.args.device,
+        "workers" : trainer.args.workers,
+        "optimize" : trainer.args.optimize,
+        "optimizer" : trainer.args.optimizer,
+        "lr0" : trainer.args.lr0,
+        "lrf" : trainer.args.lrf,
+        "patience" : trainer.args.patience,
+        "epochs" : trainer.args.epochs,
+        "seed" : trainer.args.seed,
+    })
+    pics.upload_artifact("confusion_matrix", f'{trainer.save_dir}/confusion_matrix.png')
+    pics.upload_artifact("F1_curve", f'{trainer.save_dir}/F1_curve.png')
+    pics.upload_artifact("labels", f'{trainer.save_dir}/labels.jpg')
 
 if __name__ == '__main__':
 
-    xml_reader = XmlTrainReader("config.train.xml")
+    xml_picsellia_config = XmlPicselliaReader("picsellia.config.xml")
+    xml_train_config = XmlTrainReader("config.train.xml")
     yolo_config_file_name = "yolo_config.yaml"
-    dataset_path = xml_reader.dataset_path
+    dataset_path = xml_train_config.dataset_path
 
     yolo_config_file = f'{dataset_path}/{yolo_config_file_name}'
 
     pics = Picsellia(
-        api_token=xml_reader.api_token,
-        organization_name=xml_reader.organization_name)
+        api_token=xml_picsellia_config.api_token,
+        organization_name=xml_picsellia_config.organization_name)
 
     experiment = pics.set_experiment(
-        project_name=xml_reader.project_name,
-        experiment_name=xml_reader.experiment_name,
+        project_name=xml_picsellia_config.project_name,
+        experiment_name=xml_train_config.experiment_name,
         force_create=True
     )
 
-    dataset = pics.set_dataset(xml_reader.dataset_version_id)
+    dataset = pics.set_dataset(xml_train_config.dataset_version_id)
 
     pics.attach_current_dataset()
 
@@ -57,18 +73,6 @@ if __name__ == '__main__':
     else:
         device_type = "cpu"
 
-    config = {
-        "data" : yolo_config_file,
-        "batch_size" : 16,
-        "imgsz" : 640,
-        "device" : device_type,
-        "workers" : 8,
-        "optimizer" : "auto",
-        "lr0" : 0.01,
-        "patience" : 100,
-        "epochs" : 2,
-    }
-
     print(f'Device type: {device_type}')
     # Load a model
     model = YOLO("yolo11n.pt")  # load a pretrained model (recommended for training)
@@ -76,16 +80,13 @@ if __name__ == '__main__':
 
     # Train the model
     results = model.train(
-        data=config["data"],
-        epochs=config["epochs"],
-        imgsz=config["imgsz"],
+        data=yolo_config_file,
+        epochs=2,
+        imgsz=640,
         close_mosaic=0,
-        device=config["device"],
-        batch=config["batch_size"],
-        workers=config["workers"],
-        patience=config["patience"],
-        lr0=config["lr0"],
-        optimizer=config["optimizer"]
+        device=device_type,
+        batch=16,
+        patience=100,
     )
 
     #eval = model.val()

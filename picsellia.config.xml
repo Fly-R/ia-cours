@@ -1,0 +1,5 @@
+<config>
+    <api_token>...</api_token>
+    <organization_name>...</organization_name>
+    <project_name>...</project_name>
+</config>

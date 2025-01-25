@@ -1,4 +1,4 @@
 <config>
-    <model_path>...</model_path>
+    <experiment_name>...</experiment_name>
     <image_folder>...</image_folder>
 </config>

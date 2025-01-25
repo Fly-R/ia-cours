@@ -11,18 +11,12 @@ class Picsellia:
             organization_name=organization_name
         )
 
-        self.__project = None
         self.__experiment = None
         self.__dataset = None
 
-    def set_project(self, project_name:str) -> Project:
-        if self.__project is None :
-            self.__project = self.__client.get_project(project_name)
-        return self.__project
-
     def set_experiment(self, project_name:str, experiment_name:str, force_create:bool=False) -> Experiment:
         if self.__experiment is None:
-            project = self.set_project(project_name)
+            project = self.__client.get_project(project_name)
             try:
                 self.__experiment = project.get_experiment(experiment_name)
             except Exception as e:
@@ -36,16 +30,21 @@ class Picsellia:
             self.__dataset = self.__client.get_dataset_version_by_id(dataset_id)
         return self.__dataset
 
-    def upload_model_version(self, model_name:str, model_weights_path:str) -> None:
+    def upload_model_version(self, model_name:str, model_path:str) -> None:
         model = self.__client.get_model(name=model_name)
         export = self.__experiment.export_in_existing_model(model)
         self.__experiment.attach_model_version(export)
         export.update(type=InferenceType.OBJECT_DETECTION)
         export.update(framework=Framework.PYTORCH)
         try:
-            export.store(name="model-latest", path=f'{model_weights_path}/best.pt')
+            export.store(name="model-latest", path=model_path)
         except Exception as e:
             print(e)
+
+    def upload_artifact(self, artifact_name:str, artifact_path:str) -> None:
+        if self.__experiment is None :
+            raise Exception('Experiment not set')
+        self.__experiment.store(artifact_name, artifact_path)
 
     def attach_current_dataset(self) -> None:
         if self.__dataset is None or self.__experiment is None:
