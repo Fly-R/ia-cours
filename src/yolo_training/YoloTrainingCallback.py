@@ -22,11 +22,11 @@ class YoloTrainingCallback:
 
     def on_train_epoch_end(self, trainer:DetectionTrainer):
         experiment = self.__pics.experiment
-        experiment.log(name="precision", data=trainer.metrics["metrics/precision(B)"], type=LogType.LINE)
-        experiment.log(name="recall", data=trainer.metrics["metrics/recall(B)"], type=LogType.LINE)
-        experiment.log(name="mAP50", data=trainer.metrics["metrics/mAP50(B)"], type=LogType.LINE)
-        experiment.log(name="mAP50-95", data=trainer.metrics["metrics/mAP50-95(B)"], type=LogType.LINE)
+        experiment.log(name="precision", data=float(trainer.metrics["metrics/precision(B)"]), type=LogType.LINE)
+        experiment.log(name="recall", data=float(trainer.metrics["metrics/recall(B)"]), type=LogType.LINE)
+        experiment.log(name="mAP50", data=float(trainer.metrics["metrics/mAP50(B)"]), type=LogType.LINE)
+        experiment.log(name="mAP50-95", data=float(trainer.metrics["metrics/mAP50-95(B)"]), type=LogType.LINE)
 
-        experiment.log(name="lr-pg0", data=trainer.lr["lr/pg0"].item(), type=LogType.LINE)
-        experiment.log(name="lr-pg1", data=trainer.lr["lr/pg1"].item(), type=LogType.LINE)
-        experiment.log(name="lr-pg2", data=trainer.lr["lr/pg2"].item(), type=LogType.LINE)
+        experiment.log(name="lr-pg0", data=float(trainer.lr["lr/pg0"]), type=LogType.LINE)
+        experiment.log(name="lr-pg1", data=float(trainer.lr["lr/pg1"]), type=LogType.LINE)
+        experiment.log(name="lr-pg2", data=float(trainer.lr["lr/pg2"]), type=LogType.LINE)
