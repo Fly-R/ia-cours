@@ -11,5 +11,9 @@ class XmlExecReader:
         return self.__root.find("experiment_name").text
 
     @property
-    def images_folder(self):
-        return self.__root.find("image_folder").text
+    def source(self):
+        return self.__root.find("source").text
+
+    @property
+    def inference_type(self):
+        return self.__root.find("inference_type").text

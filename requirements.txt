@@ -4,4 +4,3 @@ pre-commit
 black
 picsellia
 ultralytics
-pandas

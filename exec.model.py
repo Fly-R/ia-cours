@@ -11,30 +11,32 @@ if __name__ == '__main__':
     xml_picsellia_config = XmlPicselliaReader("picsellia.config.xml")
     xml_exec_reader = XmlExecReader("config.exec.xml")
 
-    pics = Picsellia(
-        api_token=xml_picsellia_config.api_token,
-        organization_name=xml_picsellia_config.organization_name)
+    models_path = f'./models/{xml_exec_reader.experiment_name}'
 
-    experiment = pics.set_experiment(xml_picsellia_config.project_name, xml_exec_reader.experiment_name)
+    model_file_path = f'{models_path}/best.pt'
 
-    model_path = f'./models/{xml_exec_reader.experiment_name}'
+    if os.path.exists(model_file_path) is False:
+        pics = Picsellia(
+            api_token=xml_picsellia_config.api_token,
+            organization_name=xml_picsellia_config.organization_name)
 
-    experiment.get_base_model_version().get_file("model-latest").download(target_path=model_path, force_replace=True)
+        experiment = pics.set_experiment(xml_picsellia_config.project_name, xml_exec_reader.experiment_name)
+        experiment.get_base_model_version().get_file("model-latest").download(target_path=models_path,
+                                                                              force_replace=True)
 
-    model = YOLO(f'{model_path}/best.pt')
+    model = YOLO(model_file_path)
 
-    # Run batched inference on a list of images
-    images = []
-    for image in os.listdir(xml_exec_reader.images_folder):
-        images.append(f'{xml_exec_reader.images_folder}/{image}')
+    if xml_exec_reader.inference_type == "video":
+        model(xml_exec_reader.source, show=True)
 
-    results = model(images)  # return a list of Results objects
+    elif xml_exec_reader.inference_type == "images":
+        save_images_path = f'./exec/{xml_exec_reader.experiment_name}'
+        model(source=xml_exec_reader.source, save=True,project=save_images_path)
 
-    # Process results list
-    for result in results:
-        boxes = result.boxes  # Boxes object for bounding box outputs
-        masks = result.masks  # Masks object for segmentation masks outputs
-        keypoints = result.keypoints  # Keypoints object for pose outputs
-        probs = result.probs  # Probs object for classification outputs
-        obb = result.obb  # Oriented boxes object for OBB outputs
-        result.show()  # display to screen                to disk
+    else:
+        model(0, show=True)
+
+
+
+
+

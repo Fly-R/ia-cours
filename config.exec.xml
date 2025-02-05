@@ -1,4 +1,5 @@
 <config>
+    <inference_type>stream</inference_type> <!--stream / video / images-->
     <experiment_name>...</experiment_name>
-    <image_folder>...</image_folder>
+    <source>...</source>
 </config>
