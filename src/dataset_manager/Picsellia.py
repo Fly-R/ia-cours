@@ -59,5 +59,5 @@ class Picsellia:
                 break
 
         if dataset_already_attached is False:
-            self.__experiment.attach_dataset(self.__dataset)
+            self.__experiment.attach_dataset(name="dataset", dataset_version=self.__dataset)
 

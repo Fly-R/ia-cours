@@ -19,10 +19,10 @@ class YoloPrepareData:
         if ratios is None:
             ratios = [0.6, 0.2, 0.2]
 
+        yolo_config = YoloConfig(final_dataset_path)
+
         train_assets, test_assets, val_assets, count_train, count_test, count_val, labels = (
             self.__dataset.train_test_val_split(ratios=ratios, random_seed=seed))
-
-        yolo_config = YoloConfig(final_dataset_path)
 
         train_assets.download(yolo_config.images_train, use_id=self.__use_image_id)
         val_assets.download(yolo_config.images_val, use_id=self.__use_image_id)
@@ -35,21 +35,22 @@ class YoloPrepareData:
         YoloPrepareData.__move_annotations(os.listdir(yolo_config.images_val), annotations_path, yolo_config.labels_val)
         YoloPrepareData.__move_annotations(os.listdir(yolo_config.images_test), annotations_path, yolo_config.labels_test)
 
-        yolo_config.generate_file(final_dataset_path, labels)
+        shutil.rmtree(annotations_path)
+
+        yolo_config.generate_file(labels)
 
         return yolo_config
 
 
     @staticmethod
-    def __move_annotations(images, src, dest):
-        os.makedirs(dest, exist_ok=True)
+    def __move_annotations(images, annotations_src, annotations_dest):
+        os.makedirs(annotations_dest, exist_ok=True)
         for image in images:
             image_name = os.path.splitext(image)[0]
-            annotation_path = f'{src}/{image_name}.txt'
+            annotation_path = f'{annotations_src}/{image_name}.txt'
             if os.path.exists(annotation_path):
-                shutil.move(annotation_path, f'{dest}/{image_name}.txt')
+                shutil.move(annotation_path, f'{annotations_dest}/{image_name}.txt')
 
     def __download_annotations(self, annotations_path:str) -> None:
-        self.__dataset.export_annotation_file(AnnotationFileType.YOLO, annotations_path, use_id=self.__use_image_id)
-        zip_path = f'{annotations_path}/0192f6db-86b6-784c-80e6-163debb242d5/annotations/{self.__dataset.id}_annotations.zip'
+        zip_path = self.__dataset.export_annotation_file(AnnotationFileType.YOLO, annotations_path, use_id=self.__use_image_id)
         shutil.unpack_archive(zip_path, annotations_path)
