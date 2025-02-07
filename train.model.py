@@ -41,15 +41,10 @@ if __name__ == '__main__':
         device_type = "cpu"
 
     print(f'Device type: {device_type}')
-    # Load a model
     model = YOLO("yolo11n.pt")
 
-    training_callbacks = YoloTrainingCallback(pics, xml_picsellia_config)
-    predict_callbacks = YoloPredictCallbacks(pics)
-
-    model.add_callback("on_train_end", training_callbacks.on_train_end)
-    model.add_callback("on_train_epoch_end", training_callbacks.on_train_epoch_end)
-    model.add_callback("on_predict_batch_end", predict_callbacks.on_predict_batch_end)
+    YoloTrainingCallback(pics, xml_picsellia_config).apply_callbacks(model, send_metrics_on_epoch_end=xml_train_config.send_metrics_on_epoch_end)
+    YoloPredictCallbacks(pics).apply_callbacks(model)
 
     model.train(data=yolo_config.file_path,epochs=2, device=device_type)
 

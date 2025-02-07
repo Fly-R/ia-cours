@@ -1,5 +1,6 @@
 import os
 
+from ultralytics import YOLO
 from ultralytics.models.yolo.detect import DetectionPredictor
 
 from src.dataset_manager.Picsellia import Picsellia
@@ -10,7 +11,10 @@ class YoloPredictCallbacks:
     def __init__(self, pics: Picsellia):
         self.__pics = pics
 
-    def on_predict_batch_end(self, predictor: DetectionPredictor):
+    def apply_callbacks(self, model:YOLO):
+        model.add_callback("on_predict_batch_end", self.__on_predict_batch_end)
+
+    def __on_predict_batch_end(self, predictor: DetectionPredictor):
         dataset = self.__pics.dataset
         experiment = self.__pics.experiment
         for item in predictor.results:
