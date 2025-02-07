@@ -5,7 +5,7 @@ from picsellia.types.enums import InferenceType, Framework
 
 class Picsellia:
 
-    def __init__(self, api_token:str, organization_name:str, project_name:str, experiment_name:str, dataset_id:str):
+    def __init__(self, api_token:str, organization_name:str, project_name:str, experiment_name:str, dataset_id:str=None):
         self.__client = Client(
             api_token=api_token,
             organization_name=organization_name
@@ -20,7 +20,8 @@ class Picsellia:
         except Exception as e:
             self.__experiment = project.create_experiment(experiment_name)
 
-        self.__dataset = self.__client.get_dataset_version_by_id(dataset_id)
+        if dataset_id is not None:
+            self.__dataset = self.__client.get_dataset_version_by_id(dataset_id)
 
     @property
     def experiment(self) -> Experiment:

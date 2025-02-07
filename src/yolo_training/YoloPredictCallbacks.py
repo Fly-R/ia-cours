@@ -34,4 +34,4 @@ class YoloPredictCallbacks:
             asset = dataset.find_asset(id=img)
             experiment.add_evaluation(asset, rectangles=boxes)
 
-            print(f'Evaluated asset {img} uploaded')
+            print(f'Asset {img} evaluation uploaded')
