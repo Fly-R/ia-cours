@@ -27,16 +27,28 @@ class YoloTrainingCallback:
         self.__pics = pics
         self.__xml_config = xml_config
 
-    def apply_callbacks(self, model:YOLO, send_metrics_on_epoch_end=True):
+    def apply_callbacks(self, model:YOLO, send_metrics_on_epoch_end:bool=True) -> None:
+        """
+        Add callbacks for the following events:
+            - 'on_train_end' : Upload training artifacts to Picsellia
+            - 'on_train_epoch_end' and 'on_val_end' : Upload training metrics to Picsellia
+
+        If 'send_metrics_on_epoch_end' is set to True, metrics will be sent at the end of each epoch and validation.
+        If set to False, all metrics will be sent at the end of the training process
+
+        :param model: YOLO model to add the callback to
+        :param send_metrics_on_epoch_end: Determines whether metrics are sent at each epoch end
+        :return:
+        """
         if send_metrics_on_epoch_end:
             model.add_callback("on_train_epoch_end", self.__send_metrics_on_train_epoch_end)
             model.add_callback("on_val_end", self.__send_metrics_on_val_end)
         else:
             model.add_callback("on_train_end", self.__send_metrics_on_train_end)
 
-        model.add_callback("on_train_end", self.__on_train_end)
+        model.add_callback("on_train_end", self.__send_artifacts_on_train_end)
 
-    def __on_train_end(self, trainer:DetectionTrainer):
+    def __send_artifacts_on_train_end(self, trainer:DetectionTrainer) -> None:
         self.__pics.upload_model_version(self.__xml_config.project_name, trainer.best)
         self.__pics.experiment.log_parameters(trainer.args.__dict__)
         self.__pics.upload_artifact("confusion_matrix", f'{trainer.save_dir}/confusion_matrix.png')
@@ -44,7 +56,7 @@ class YoloTrainingCallback:
         self.__pics.upload_artifact("F1_curve", f'{trainer.save_dir}/F1_curve.png')
         self.__pics.upload_artifact("labels", f'{trainer.save_dir}/labels.jpg')
 
-    def __send_metrics_on_train_end(self, trainer:DetectionTrainer):
+    def __send_metrics_on_train_end(self, trainer:DetectionTrainer) -> None:
         experiment = self.__pics.experiment
         metrics_csv = pd.read_csv(trainer.csv)
 
@@ -72,7 +84,7 @@ class YoloTrainingCallback:
         experiment.log(name=self.__DFL_LOSS, data=dfl_loss_data, type=LogType.LINE)
 
 
-    def __send_metrics_on_train_epoch_end(self, trainer:DetectionTrainer):
+    def __send_metrics_on_train_epoch_end(self, trainer:DetectionTrainer) -> None:
         experiment = self.__pics.experiment
         experiment.log(name=self.__PRECISION, data=float(trainer.metrics[self.__PRECISION_METRIC]), type=LogType.LINE)
         experiment.log(name=self.__RECALL, data=float(trainer.metrics[self.__RECALL_METRIC]), type=LogType.LINE)
@@ -83,7 +95,7 @@ class YoloTrainingCallback:
         experiment.log(name=self.__CLS_LOSS, data={'train':[float(trainer.loss_items[1].item())]}, type=LogType.LINE)
         experiment.log(name=self.__DFL_LOSS, data={'train':[float(trainer.loss_items[2].item())]}, type=LogType.LINE)
 
-    def __send_metrics_on_val_end(self, trainer:DetectionValidator):
+    def __send_metrics_on_val_end(self, trainer:DetectionValidator) -> None:
         experiment = self.__pics.experiment
         experiment.log(name=self.__BOX_LOSS, data={'val': [float(trainer.loss[0].item())]}, type=LogType.LINE)
         experiment.log(name=self.__CLS_LOSS, data={'val': [float(trainer.loss[1].item())]}, type=LogType.LINE)

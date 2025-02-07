@@ -11,10 +11,15 @@ class YoloPredictCallbacks:
     def __init__(self, pics: Picsellia):
         self.__pics = pics
 
-    def apply_callbacks(self, model:YOLO):
-        model.add_callback("on_predict_batch_end", self.__on_predict_batch_end)
+    def apply_callbacks(self, model:YOLO) -> None:
+        """
+        Add a callback on the 'on_predict_batch_end' event to upload the evaluation of the predictions to Picsellia
+        :param model: YOLO model to add the callback to
+        :return:
+        """
+        model.add_callback("on_predict_batch_end", self.__send_evaluation_on_batch_end)
 
-    def __on_predict_batch_end(self, predictor: DetectionPredictor):
+    def __send_evaluation_on_batch_end(self, predictor: DetectionPredictor) -> None:
         dataset = self.__pics.dataset
         experiment = self.__pics.experiment
         for item in predictor.results:

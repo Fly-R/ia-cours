@@ -9,6 +9,8 @@ __pycache__/
 
 annotations/
 dataset/
+exec/
+models/
 runs/
 *.pt
 

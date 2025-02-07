@@ -1,5 +1,5 @@
 
-from picsellia import Client, Experiment, Project, DatasetVersion
+from picsellia import Client, Experiment, DatasetVersion
 from picsellia.types.enums import InferenceType, Framework
 
 
@@ -31,8 +31,15 @@ class Picsellia:
     def dataset(self) -> DatasetVersion:
         return self.__dataset
 
-    def upload_model_version(self, model_name:str, model_path:str) -> None:
-        model = self.__client.get_model(name=model_name)
+    def upload_model_version(self, project_name:str, model_path:str) -> None:
+        """
+        Upload trained model to Picsellia and attach it to the current experiment as an object detection model using
+        Pytorch named 'model-latest'
+        :param project_name: Name of the global project
+        :param model_path: Path to the model to upload
+        :return:
+        """
+        model = self.__client.get_model(name=project_name)
         export = self.__experiment.export_in_existing_model(model)
         self.__experiment.attach_model_version(export)
         export.update(type=InferenceType.OBJECT_DETECTION)
@@ -43,11 +50,21 @@ class Picsellia:
             print(e)
 
     def upload_artifact(self, artifact_name:str, artifact_path:str) -> None:
+        """
+        Upload file as an artifact to the current experiment
+        :param artifact_name: Name of the artifact in the experiment
+        :param artifact_path: Path to the file to upload
+        :return:
+        """
         if self.__experiment is None :
             raise Exception('Experiment not set')
         self.__experiment.store(artifact_name, artifact_path)
 
     def attach_current_dataset(self) -> None:
+        """
+        Attach the current dataset to the experiment if it isn't already attached.
+        :return:
+        """
         if self.__dataset is None or self.__experiment is None:
             raise Exception("dataset or experiment is null")
 

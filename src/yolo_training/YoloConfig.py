@@ -9,34 +9,40 @@ class YoloConfig:
         self.__save_path = f'{dataset_path}/yolo_config.yaml'
 
     @property
-    def images_train(self):
+    def images_train(self) -> str:
         return f'{self.__path}/images/train'
 
     @property
-    def images_val(self):
+    def images_val(self) -> str:
         return f'{self.__path}/images/val'
 
     @property
-    def images_test(self):
+    def images_test(self) -> str:
         return f'{self.__path}/images/test'
 
     @property
-    def labels_train(self):
+    def labels_train(self) -> str:
         return f'{self.__path}/labels/train'
 
     @property
-    def labels_val(self):
+    def labels_val(self) -> str:
         return f'{self.__path}/labels/val'
 
     @property
-    def labels_test(self):
+    def labels_test(self) -> str:
         return f'{self.__path}/labels/test'
 
     @property
-    def file_path(self):
+    def file_path(self) -> str:
         return self.__save_path
 
-    def generate_file(self, labels:list[Label]):
+    def generate_file(self, labels:list[Label]) -> None:
+        """
+        Generate a yolo config file with the given labels and dataset path.
+        Save it to the dataset path
+        :param labels: List of labels to use
+        :return:
+        """
         yaml_config = {
             "path": self.__path,
             "train": "images/train",

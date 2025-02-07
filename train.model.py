@@ -14,8 +14,8 @@ from src.yolo_training.YoloTrainingCallback import YoloTrainingCallback
 
 if __name__ == '__main__':
 
-    xml_picsellia_config = XmlPicselliaReader("picsellia.config.xml")
-    xml_train_config = XmlTrainReader("config.train.xml")
+    xml_picsellia_config = XmlPicselliaReader("config/picsellia.config.xml")
+    xml_train_config = XmlTrainReader("config/config.train.xml")
     dataset_path = xml_train_config.dataset_path
 
     yolo_config = YoloConfig(dataset_path)

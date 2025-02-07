@@ -8,8 +8,8 @@ from src.file_reader.XmlPicselliaReader import XmlPicselliaReader
 
 if __name__ == '__main__':
 
-    xml_picsellia_config = XmlPicselliaReader("picsellia.config.xml")
-    xml_exec_reader = XmlExecReader("config.exec.xml")
+    xml_picsellia_config = XmlPicselliaReader("config/picsellia.config.xml")
+    xml_exec_reader = XmlExecReader("config/config.exec.xml")
 
     models_path = f'./models/{xml_exec_reader.experiment_name}'
 
