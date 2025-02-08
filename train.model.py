@@ -1,11 +1,11 @@
 import os.path
 
-import torch
 from ultralytics import YOLO
 
 from src.dataset_manager.Picsellia import Picsellia
 from src.file_reader.XmlPicselliaReader import XmlPicselliaReader
 from src.file_reader.XmlTrainReader import XmlTrainReader
+from src.yolo_training.DeviceDetector import DeviceDetector
 from src.yolo_training.YoloConfig import YoloConfig
 from src.yolo_training.YoloPredictCallbacks import YoloPredictCallbacks
 from src.yolo_training.YoloPrepareData import YoloPrepareData
@@ -33,14 +33,9 @@ if __name__ == '__main__':
     if os.path.exists(dataset_path) is False:
         yolo_config = YoloPrepareData(pics.dataset).prepare_new_dataset(dataset_path)
 
-    if torch.backends.mps.is_available():
-        device_type = "mps"
-    elif torch.cuda.is_available():
-        device_type = "cuda"
-    else:
-        device_type = "cpu"
-
+    device_type = DeviceDetector.get_device_type()
     print(f'Device type: {device_type}')
+
     model = YOLO("yolo11n.pt")
 
     YoloTrainingCallback(pics, xml_picsellia_config).apply_callbacks(model, send_metrics_on_epoch_end=xml_train_config.send_metrics_on_epoch_end)

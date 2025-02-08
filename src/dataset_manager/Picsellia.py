@@ -49,6 +49,16 @@ class Picsellia:
         except Exception as e:
             print(e)
 
+    def download_model_version(self, models_path:str) -> str:
+        """
+        Download the latest model version from the current experiment
+        :param models_path: Path to save the model
+        :return: Path to the downloaded model
+        """
+        self.__experiment.get_base_model_version().get_file("model-latest").download(target_path=models_path,
+                                                                               force_replace=True)
+        return f'{models_path}/best.pt'
+
     def upload_artifact(self, artifact_name:str, artifact_path:str) -> None:
         """
         Upload file as an artifact to the current experiment
