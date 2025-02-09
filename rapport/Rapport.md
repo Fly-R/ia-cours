@@ -145,7 +145,7 @@ Le fait de baisser la learning rate a permis de stabiliser un peu plus les varia
 | <img src="img/exp6/box_loss.png" width="350" height="300"> | <img src="img/exp6/cls_loss.png" width="350" height="300"> | <img src="img/exp6/dfl_loss.png" width="350" height="300"> |
 
 <img src="img/exp6/conf_matrix.png" width="350" height="300">
-<img src="img/exp6/F1_curve.png" width="350" height="300">
+<img src="img/exp6/f1_curve.png" width="350" height="300">
 
 ### Observations :
 - Fitness de 77.6 % (meilleur score obtenu jusqu’ici).
