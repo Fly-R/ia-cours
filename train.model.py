@@ -20,6 +20,8 @@ if __name__ == '__main__':
 
     yolo_config = YoloConfig(dataset_path)
 
+    seed = 42
+
     pics = Picsellia(
         api_token=xml_picsellia_config.api_token,
         organization_name=xml_picsellia_config.organization_name,
@@ -31,16 +33,30 @@ if __name__ == '__main__':
     pics.attach_current_dataset()
 
     if os.path.exists(dataset_path) is False:
-        yolo_config = YoloPrepareData(pics.dataset).prepare_new_dataset(dataset_path)
+        yolo_config = YoloPrepareData(pics.dataset).prepare_new_dataset(dataset_path, seed=seed)
 
     device_type = DeviceDetector.get_device_type()
     print(f'Device type: {device_type}')
 
-    model = YOLO("yolo11n.pt")
+    model = YOLO("yolo11m.pt")
 
     YoloTrainingCallback(pics, xml_picsellia_config).apply_callbacks(model, send_metrics_on_epoch_end=xml_train_config.send_metrics_on_epoch_end)
     YoloPredictCallbacks(pics).apply_callbacks(model)
 
-    model.train(data=yolo_config.file_path,epochs=2, device=device_type)
+    model.train(
+        data=yolo_config.file_path,
+        epochs=250,
+        device=device_type,
+        close_mosaic=0,
+        seed=seed,
+        patience= 20,
+        lr0 = 0.00179,
+        lrf = 0.01518,
+        translate=0.1,
+        mosaic = 0.1,
+        scale = 0.5,
+        shear = 10,
+        flipud = 0.5
+    )
 
     model.predict(yolo_config.images_test, device=device_type)
