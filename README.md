@@ -10,6 +10,7 @@ Le projet contient 2 pipelines:
 ```bash
 pip3 install -r requirements.txt
 ```
+Ce projet utilise **Black**, **Flake8** et **pre-commit** pour garantir un code propre et structuré.
 
 ### Installation pour CUDA
 - Mettre à jour les drivers NVIDIA avec la dernière version disponible
@@ -54,7 +55,7 @@ La configuration du projet se fait via les fichiers de configuration xml dans le
 - `experiment_name` : Nom de l'experiment sur Picsellia. Si l'expérience n'existe pas, elle sera créée automatiquement.
 - `dataset_path` : Localisation du dataset sur le disque une fois téléchargé et formatté.
 - `dataset_version_id` : ID de la version du dataset sur Picsellia. Le dataset sera automatiquement attaché à l'experiment si ce n'est pas déjà le cas.
-- `send_metrics_on_epoch_end` : Envoi les métriques à Picsellia à la fin de chaque epoch pour avoir un feedback du training en continu. 
+- `send_metrics_on_epoch_end` : Envoi les métriques à Picsellia à la fin de chaque epoch pour avoir un feedback du training en continu.
 Peut être désactivé pour n'enregistrer les métriques qu'à la fin du training, notamment en cas de problème de timeout lors de l'envoi des métriques, ce qui stoppe le processus de training.
 
 ### Configuration de l'inférence
@@ -68,7 +69,7 @@ Peut être désactivé pour n'enregistrer les métriques qu'à la fin du trainin
 ```
 
 - `inference_type` : Type d'inférence à réaliser. Types disponibles :
-  - `images` : analyse les images du dossier renseigné dans `source`. 
+  - `images` : analyse les images du dossier renseigné dans `source`.
   - `video` : analyse la vidéo renseignée dans `source`.
   - `stream` : lance un stream de la webcam et analyse en temps réel.
 - `experiment_name` : Nom de l'experiment sur Picsellia pour récupérer le modèle associé.
@@ -97,17 +98,17 @@ Etapes du training:
 - Valide le modèle sur le split de test et envoi les evaluations dans l'experiment Picsellia.
 
 Métriques :
-- `precision` : Pourcentage d’objets correctement détectés parmi toutes les détections du modèle. Une précision 
+- `precision` : Pourcentage d’objets correctement détectés parmi toutes les détections du modèle. Une précision
 élevée signifie que le modèle fait peu d’erreurs en détectant des objets qui n’existent pas (fausses détections)
-- `recall` : Pourcentage d’objets réellement présents qui ont été détectés par le modèle. Un recall élevé 
+- `recall` : Pourcentage d’objets réellement présents qui ont été détectés par le modèle. Un recall élevé
 signifie que le modèle ne manque presque aucun objet
-- `mAP50` : Moyenne des précisions obtenues pour toutes les classes d’objets, en considérant une 
+- `mAP50` : Moyenne des précisions obtenues pour toutes les classes d’objets, en considérant une
 prédiction correcte si l’intersection entre la boîte détectée et la boîte réelle est d’au moins 50%
-- `mAP50_95` : Similaire à mAP50, mais il prend en compte plusieurs niveaux de précision en variant le seuil 
+- `mAP50_95` : Similaire à mAP50, mais il prend en compte plusieurs niveaux de précision en variant le seuil
 d’intersection (IoU) entre 50% et 95%. Cela donne une évaluation plus complète de la qualité du modèle
-- `box_loss` : Mesure l’erreur dans la position et la taille des boîtes détectées par rapport aux vraies boîtes. Plus 
+- `box_loss` : Mesure l’erreur dans la position et la taille des boîtes détectées par rapport aux vraies boîtes. Plus
 la perte est faible, plus la détection des objets est précise
-- `cls_loss` : Indique si le modèle a bien identifié la classe des objets détectés. Une grande perte signifie que le 
+- `cls_loss` : Indique si le modèle a bien identifié la classe des objets détectés. Une grande perte signifie que le
 modèle fait souvent des erreurs en confondant les objets
 - `dfl_loss` : Aide à améliorer la précision des boîtes détectées en affinant leur position. Cette métrique est utilisée
 dans des modèles avancés comme YOLOv8 pour rendre la détection encore plus précise
@@ -125,5 +126,5 @@ Etapes de l'inférence :
 - Lance l'inférence selon le type renseigné
   - Stream : ouvre une fenetre en affiche le flux de la webcam avec la détection en temps réel.
   - Vidéo : ouvre une fenetre et affiche la vidéo avec la détection en temps réel.
-  - Images : analyse les images dans le dossier renseigné et place les bounding boxes, puis les sauvegarde dans le dossier 
+  - Images : analyse les images dans le dossier renseigné et place les bounding boxes, puis les sauvegarde dans le dossier
   `./exec/{experiment_name}/predict`.
