@@ -8,10 +8,15 @@ from src.dataset_manager.Picsellia import Picsellia
 
 class YoloPredictCallbacks:
 
-    def __init__(self, pics: Picsellia):
-        self.__pics = pics
+    def __init__(self, pics: Picsellia) -> None:
+        """
+        Initialize with a Picsellia instance.
 
-    def apply_callbacks(self, model:YOLO) -> None:
+        :param pics: A Picsellia instance used to interact with the dataset and experiment.
+        """
+        self.__pics: Picsellia = pics
+
+    def apply_callbacks(self, model: YOLO) -> None:
         """
         Add a callback on the 'on_predict_batch_end' event to upload the evaluation of the predictions to Picsellia
         :param model: YOLO model to add the callback to
@@ -39,4 +44,4 @@ class YoloPredictCallbacks:
             asset = dataset.find_asset(id=img)
             experiment.add_evaluation(asset, rectangles=boxes)
 
-            print(f'Asset {img} evaluation uploaded')
+            print(f"Asset {img} evaluation uploaded")
