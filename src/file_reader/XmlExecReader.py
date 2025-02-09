@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
 
+
 class XmlExecReader:
 
-    def __init__(self, path:str):
+    def __init__(self, path: str):
         self.__path = path
         self.__root = ET.parse(path).getroot()
 

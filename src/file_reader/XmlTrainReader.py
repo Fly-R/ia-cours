@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
 
+
 class XmlTrainReader:
 
-    def __init__(self, path:str):
+    def __init__(self, path: str):
         self.__path = path
         self.__root = ET.parse(path).getroot()
 
@@ -12,7 +13,7 @@ class XmlTrainReader:
 
     @property
     def dataset_version_id(self) -> str:
-        return  self.__root.find("dataset_version_id").text
+        return self.__root.find("dataset_version_id").text
 
     @property
     def experiment_name(self) -> str:
@@ -20,4 +21,4 @@ class XmlTrainReader:
 
     @property
     def send_metrics_on_epoch_end(self) -> bool:
-        return self.__root.find("send_metrics_on_epoch_end").text == 'True'
+        return self.__root.find("send_metrics_on_epoch_end").text == "True"
