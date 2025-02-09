@@ -1,15 +1,18 @@
-
 from picsellia import Client, Experiment, DatasetVersion
 from picsellia.types.enums import InferenceType, Framework
 
 
 class Picsellia:
 
-    def __init__(self, api_token:str, organization_name:str, project_name:str, experiment_name:str, dataset_id:str=None):
-        self.__client = Client(
-            api_token=api_token,
-            organization_name=organization_name
-        )
+    def __init__(
+        self,
+        api_token: str,
+        organization_name: str,
+        project_name: str,
+        experiment_name: str,
+        dataset_id: str = None,
+    ):
+        self.__client = Client(api_token=api_token, organization_name=organization_name)
 
         self.__experiment = None
         self.__dataset = None
@@ -17,7 +20,7 @@ class Picsellia:
         project = self.__client.get_project(project_name)
         try:
             self.__experiment = project.get_experiment(experiment_name)
-        except Exception as e:
+        except Exception:
             self.__experiment = project.create_experiment(experiment_name)
 
         if dataset_id is not None:
@@ -31,7 +34,7 @@ class Picsellia:
     def dataset(self) -> DatasetVersion:
         return self.__dataset
 
-    def upload_model_version(self, project_name:str, model_path:str) -> None:
+    def upload_model_version(self, project_name: str, model_path: str) -> None:
         """
         Upload trained model to Picsellia and attach it to the current experiment as an object detection model using
         Pytorch named 'model-latest'
@@ -49,25 +52,26 @@ class Picsellia:
         except Exception as e:
             print(e)
 
-    def download_model_version(self, models_path:str) -> str:
+    def download_model_version(self, models_path: str) -> str:
         """
         Download the latest model version from the current experiment
         :param models_path: Path to save the model
         :return: Path to the downloaded model
         """
-        self.__experiment.get_base_model_version().get_file("model-latest").download(target_path=models_path,
-                                                                               force_replace=True)
-        return f'{models_path}/best.pt'
+        self.__experiment.get_base_model_version().get_file("model-latest").download(
+            target_path=models_path, force_replace=True
+        )
+        return f"{models_path}/best.pt"
 
-    def upload_artifact(self, artifact_name:str, artifact_path:str) -> None:
+    def upload_artifact(self, artifact_name: str, artifact_path: str) -> None:
         """
         Upload file as an artifact to the current experiment
         :param artifact_name: Name of the artifact in the experiment
         :param artifact_path: Path to the file to upload
         :return:
         """
-        if self.__experiment is None :
-            raise Exception('Experiment not set')
+        if self.__experiment is None:
+            raise Exception("Experiment not set")
         self.__experiment.store(artifact_name, artifact_path)
 
     def attach_current_dataset(self) -> None:
@@ -86,5 +90,6 @@ class Picsellia:
                 break
 
         if dataset_already_attached is False:
-            self.__experiment.attach_dataset(name="dataset", dataset_version=self.__dataset)
-
+            self.__experiment.attach_dataset(
+                name="dataset", dataset_version=self.__dataset
+            )
