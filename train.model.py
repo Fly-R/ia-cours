@@ -12,17 +12,19 @@ from src.yolo_training.YoloPrepareData import YoloPrepareData
 from src.yolo_training.YoloTrainingCallback import YoloTrainingCallback
 
 
-if __name__ == "__main__":
+def main() -> None:
 
-    xml_picsellia_config = XmlPicselliaReader("config/picsellia.config.xml")
-    xml_train_config = XmlTrainReader("config/config.train.xml")
-    dataset_path = xml_train_config.dataset_path
+    xml_picsellia_config: XmlPicselliaReader = XmlPicselliaReader(
+        "config/picsellia.config.xml"
+    )
+    xml_train_config: XmlTrainReader = XmlTrainReader("config/config.train.xml")
+    dataset_path: str = xml_train_config.dataset_path
 
-    yolo_config = YoloConfig(dataset_path)
+    yolo_config: YoloConfig = YoloConfig(dataset_path)
 
-    seed = 42
+    seed: int = 42
 
-    pics = Picsellia(
+    pics: Picsellia = Picsellia(
         api_token=xml_picsellia_config.api_token,
         organization_name=xml_picsellia_config.organization_name,
         project_name=xml_picsellia_config.project_name,
@@ -37,10 +39,10 @@ if __name__ == "__main__":
             dataset_path, seed=seed
         )
 
-    device_type = DeviceDetector.get_device_type()
+    device_type: str = DeviceDetector.get_device_type()
     print(f"Device type: {device_type}")
 
-    model = YOLO("yolo11m.pt")
+    model: YOLO = YOLO("yolo11m.pt")
 
     YoloTrainingCallback(pics, xml_picsellia_config).apply_callbacks(
         model, send_metrics_on_epoch_end=xml_train_config.send_metrics_on_epoch_end
@@ -64,3 +66,7 @@ if __name__ == "__main__":
     )
 
     model.predict(yolo_config.images_test, device=device_type)
+
+
+if __name__ == "__main__":
+    main()

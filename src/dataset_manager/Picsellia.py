@@ -1,3 +1,5 @@
+from typing import Optional
+
 from picsellia import Client, Experiment, DatasetVersion
 from picsellia.types.enums import InferenceType, Framework
 
@@ -11,11 +13,13 @@ class Picsellia:
         project_name: str,
         experiment_name: str,
         dataset_id: str = None,
-    ):
-        self.__client = Client(api_token=api_token, organization_name=organization_name)
+    ) -> None:
+        self.__client: Client = Client(
+            api_token=api_token, organization_name=organization_name
+        )
 
-        self.__experiment = None
-        self.__dataset = None
+        self.__experiment: Optional[Experiment] = None
+        self.__dataset: Optional[DatasetVersion] = None
 
         project = self.__client.get_project(project_name)
         try:
@@ -28,10 +32,19 @@ class Picsellia:
 
     @property
     def experiment(self) -> Experiment:
+        """
+        Returns the current experiment.
+        Raises an exception if the experiment is not set.
+        """
+        if self.__experiment is None:
+            raise Exception("Experiment not set")
         return self.__experiment
 
     @property
-    def dataset(self) -> DatasetVersion:
+    def dataset(self) -> Optional[DatasetVersion]:
+        """
+        Returns the current dataset, or None if it hasn't been set.
+        """
         return self.__dataset
 
     def upload_model_version(self, project_name: str, model_path: str) -> None:
@@ -43,6 +56,8 @@ class Picsellia:
         :return:
         """
         model = self.__client.get_model(name=project_name)
+        if self.__experiment is None:
+            raise Exception("Experiment not set")
         export = self.__experiment.export_in_existing_model(model)
         self.__experiment.attach_model_version(export)
         export.update(type=InferenceType.OBJECT_DETECTION)
@@ -58,6 +73,8 @@ class Picsellia:
         :param models_path: Path to save the model
         :return: Path to the downloaded model
         """
+        if self.__experiment is None:
+            raise Exception("Experiment not set")
         self.__experiment.get_base_model_version().get_file("model-latest").download(
             target_path=models_path, force_replace=True
         )
@@ -83,7 +100,7 @@ class Picsellia:
             raise Exception("dataset or experiment is null")
 
         attached_datasets = self.__experiment.list_attached_dataset_versions()
-        dataset_already_attached = False
+        dataset_already_attached: bool = False
         for dataset in attached_datasets:
             if dataset.id == self.__dataset.id:
                 dataset_already_attached = True

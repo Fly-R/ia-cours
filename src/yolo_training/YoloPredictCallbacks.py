@@ -8,8 +8,13 @@ from src.dataset_manager.Picsellia import Picsellia
 
 class YoloPredictCallbacks:
 
-    def __init__(self, pics: Picsellia):
-        self.__pics = pics
+    def __init__(self, pics: Picsellia) -> None:
+        """
+        Initialize with a Picsellia instance.
+
+        :param pics: A Picsellia instance used to interact with the dataset and experiment.
+        """
+        self.__pics: Picsellia = pics
 
     def apply_callbacks(self, model: YOLO) -> None:
         """

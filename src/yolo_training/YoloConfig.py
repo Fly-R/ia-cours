@@ -1,12 +1,13 @@
 import yaml
+from typing import Dict, Any
 from picsellia import Label
 
 
 class YoloConfig:
 
-    def __init__(self, dataset_path: str):
-        self.__path = dataset_path
-        self.__save_path = f"{dataset_path}/yolo_config.yaml"
+    def __init__(self, dataset_path: str) -> None:
+        self.__path: str = dataset_path
+        self.__save_path: str = f"{dataset_path}/yolo_config.yaml"
 
     @property
     def images_train(self) -> str:
@@ -43,7 +44,7 @@ class YoloConfig:
         :param labels: List of labels to use
         :return:
         """
-        yaml_config = {
+        yaml_config: Dict[str, Any] = {
             "path": self.__path,
             "train": "images/train",
             "val": "images/val",
